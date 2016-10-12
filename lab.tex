@@ -1,0 +1,353 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{setspace}
+\usepackage{graphics}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{float,xeCJK}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fontspec}
+\usepackage{enumerate}
+\newfontfamily\couriernew{Courier New}
+\lstset{
+	backgroundcolor=\color[rgb]{0.9,0.9,0.9}, %设置背景颜色
+    tabsize=4,    %tab大小
+    language=[GNU]C++,
+    basicstyle=\couriernew\small,	% 代码字体大小
+    % basicstyle=\small,	% 代码字体大小
+    upquote=true,
+    aboveskip={1.5\baselineskip},
+    columns=flexible,
+    extendedchars=false,
+    breaklines=true,
+    % prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+    frame=single, % 代码加边框
+    rulesepcolor=\color{white}, % 边框颜色
+    numbers=left, % 行号的位置
+    stepnumber=1, % 两个行号之间的差值
+    numberstyle=\scriptsize\color[rgb]{0.205, 0.142, 0.73},% 行号大小 颜色
+    numbersep=5pt, % 行号与代码间的距离
+    showtabs=false, % 显示tab
+    showspaces=false, %显示空格
+    showstringspaces=false, %显示字符串中的空格
+    identifierstyle=\ttfamily, %
+    keywordstyle=\bfseries\color{blue},% 关键字颜色
+    morekeywords={}, %增加关键字
+    commentstyle=\color[rgb]{0,0.5,0}, % 注释颜色
+    stringstyle=\color[rgb]{0.627,0.126,0.941},% 字符串颜色
+    escapeinside={\%*}{*)}, % if you want to add LaTeX within your code
+    % title=\lstname % 显示用\lstinputlisting导入的文件名
+}
+
+\setmonofont{Courier New}
+\setCJKmainfont[BoldFont={Adobe Heiti Std}, ItalicFont={Adobe Kaiti Std}]{Adobe Song Std}
+\setCJKmonofont{Courier New}
+\linespread{1.3}
+\setlength{\parindent}{2em}%首行  缩进
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\addtolength{\parskip}{2pt} % 设置段间距
+\renewcommand\figurename{图}
+
+\begin{document}
+\begin{center}
+	\huge{\textbf{实验4 数值积分\\}}
+\end{center}
+\begin{flushright}
+	201311211914\\
+	赵帅帅\\
+	2016--5--24\\
+\end{flushright}
+\begin{Large}
+	\textbf{一、 实验问题}
+\end{Large}
+
+	选用复化梯形公式、复化\textbf{Simpson}公式，计算积分
+	\begin{eqnarray}
+		I & = & \int_{0}^{\frac{1}{4}}\sqrt{4-\sin^{2}{x}}\;\mathrm{d}x\qquad(I\approx{}0.4987111176)\nonumber\\
+		I & = & \int_{0}^{1}\frac{\sin{x}}{x}\;\mathrm{d}x\qquad(I\approx{}0.9460830704)\nonumber\\
+		I & = & \int_{0}^{1}\frac{e^{x}}{4+x^2}\;\mathrm{d}x\qquad(I\approx{}0.3908118456)\nonumber\\
+		I & = & \int_{0}^{1}\frac{ln(1+x)}{1+x^2}\;\mathrm{d}x\qquad(I\approx{}0.2721982613)\nonumber
+	\end{eqnarray}
+\begin{Large}
+	\textbf{二、 实验要求}
+\end{Large}
+\begin{enumerate}
+	\item 编制出数值积分的算法程序。
+	\item 分别两种求积公式计算同一个积分，并比较计算结果。
+	\item 分别取不同步长$h=\frac{b-a}{n}$，比较计算结果(如$n=10,20$等)。
+	\item 给定精度要求$\varepsilon$，试确定达到精度要求的步长选取。
+\end{enumerate}
+\begin{Large}
+	\textbf{三、 实验目的与意义}
+\end{Large}
+\begin{enumerate}
+	\item 掌握各种数值积分方法。
+	\item 了解数值积分精度与步长的关系。
+	\item 体验各种数值积分方法的精度和计算量。
+\end{enumerate}
+\begin{Large}
+	\textbf{四、 算法}
+\end{Large}
+	\begin{enumerate}
+		\item 复化梯形公式
+			本算法采用复化梯形公式计算定积分$\int_{a}^{b}f(x)\;\mathrm{d}x$，计算公式为
+			\begin{displaymath}
+				S_{n}=\frac{h}{2}\left[f(a)+2\sum\limits_{i=1}^{n-1}f(x_{i})+f(b)\right]
+			\end{displaymath}
+			其中，$h=\frac{b-a}{n},\;x_i=a+ih,\;i=0,1,\cdots,n$。
+			\begin{description}
+				\item[输入 ] 端点$a,b$，正整数n
+				\item[输出 ] 定积分$\int_{a}^{b}f(x)\;\mathrm{d}x$的近似值$SN$
+			\end{description}
+			\begin{enumerate}[(1)]
+				\item 置
+					\begin{displaymath}
+						h=\frac{b-a}{n}
+					\end{displaymath}
+				\item 置
+					\begin{eqnarray}
+						F0 & = & f(a)+f(b)\nonumber\\
+						F1 & = & 0\nonumber
+					\end{eqnarray}
+				\item 对$i=1,2,\cdots,n-1$循环执行步4至步5
+				\item 置$x=a+ih$
+				\item $F1=F1+f(x_i)$
+				\item 置
+					\begin{displaymath}
+						SN=\frac{h(F0+2F1)}{2}
+					\end{displaymath}
+				\item 输出$SN$，停机
+			\end{enumerate}
+
+		\item 复化\textbf{Simpson}公式\\
+			本算法采用复化\textbf{Simpson}公式计算定积分$\int_{a}^{b}f(x)\;\mathrm{d}x$，计算公式为
+			\begin{displaymath}
+				S_{n}=\frac{h}{3}\left[f(a)+4\sum\limits_{i=1}^{n}f(x_{2i-1})+2\sum\limits_{i=1}^{n-1}f(x_{2i})+f(b)\right]
+			\end{displaymath}
+			其中，$h=\frac{b-a}{2n},\;x_i=a+ih,\;i=0,1,\cdots,2n$。
+			\begin{description}
+				\item[输入 ] 端点$a,b$，正整数n
+				\item[输出 ] 定积分$\int_{a}^{b}f(x)\;\mathrm{d}x$的近似值SN
+			\end{description}
+			\begin{enumerate}[(1)]
+			\item 置
+				\begin{displaymath}
+					h=\frac{b-a}{2n}
+				\end{displaymath}
+			\item 置
+				\begin{eqnarray}
+					F0 & = & f(a)+f(b)\nonumber\\
+					F1 & = & 0\nonumber\\
+					F2 & = & 0\nonumber
+				\end{eqnarray}
+			\item 对$i=1,2,\cdots,2n-1$循环执行步4至步5
+			\item 置$x=a+ih$
+			\item 如果$i$是偶数，则$F2=F2+f(x_i)$，否则$F1=F1+f(x_i)$
+			\item 置
+				\begin{displaymath}
+					SN=\frac{h(F0+2F2+4F1)}{3}
+				\end{displaymath}
+			\item 输出$SN$，停机
+		\end{enumerate}
+	\end{enumerate}
+\begin{Large}
+	\textbf{五、 实验代码}
+\end{Large}
+\begin{spacing}{1.0}
+	\begin{lstlisting}[language=C++]
+// 复化梯形
+float Trapezium(float (*func)(float x), float a, float b, float n)
+{
+    // 计算步长
+    float h = (b - a) / n;
+    // 计算两个端点的值
+    float F0 = func(a) + func(b);
+    float F1 = 0;
+    // 梯形公式
+    for(int i = 1; i <= n - 1; i ++)
+    {
+        // 计算下一步
+        float x = a + i * h;
+        F1 += func(x);
+    }
+    return h * (F0 + 2 * F1) / 2;
+}
+
+// 复化Simpson
+float Simpson(float (*func)(float x), float a, float b, float n)
+{
+    // 计算步长
+    float h = (b - a) / (2 * n);
+    // 计算两个端点的值
+    float F0 = func(a) + func(b);
+    float F1 = 0, F2 = 0;
+    for(int i = 1 ; i <= 2 * n -1; i ++)
+    {
+        // 计算下一步
+        float x = a + i * h;
+        i % 2? F1 += func(x) : F2 += func(x);
+    }
+    return h *(F0 + 2 * F2 + 4 * F1) / 3;
+}
+	\end{lstlisting}
+\end{spacing}
+\begin{Large}
+	\textbf{六、实验结果}
+\end{Large}
+\begin{quote}
+	\begin{description}
+		\item[操作系统：] Windows 10 企业版
+		\item[GCC 版本：] 4.9.2
+		\item[G++ 版本：] 4.9.2
+	\end{description}
+\end{quote}
+\begin{enumerate}
+	\item 比较不同积分和不同步长方法对求解的积分的误差。\footnote{所有值均四舍五入到小数点后十位。}
+	\begin{enumerate}[(1)]
+		\item 函数1
+			\begin{displaymath}
+				I=\int_{0}^{\frac{1}{4}}\sqrt{4-\sin^{2}{x}}\;\mathrm{d}x\qquad(I\approx{}0.4987111176)
+			\end{displaymath}
+			\begin{center}
+				\begin{tabular}{|c|c|c|c|}
+					\hline
+					算法 & $n=10$ & $n=20$ & $n=30$\\
+					\hline 
+					复化梯形公式 & -0.0000062911 & -0.0000015727 & -0.0000006990 \\
+					\hline
+					复化Simpson公式 & 0.0000000000 & 0.0000000000 & 0.0000000000 \\
+					\hline
+				\end{tabular}
+			\end{center}
+		\item 函数2
+			\begin{displaymath}
+				I=\int_{0}^{1}\frac{\sin{x}}{x}\;\mathrm{d}x\qquad(I\approx{}0.9460830704)
+			\end{displaymath}
+			\begin{center}
+				\begin{tabular}{|c|c|c|c|}
+					\hline
+					算法 & $n=10$ & $n=20$ & $n=30$\\
+					\hline 
+					复化梯形公式 & -0.0002509985 & -0.0000627450 & -0.0000278863 \\
+					\hline
+					复化Simpson公式 & 0.0000000061 & 0.0000000004 & 0.0000000000 \\
+					\hline
+				\end{tabular}
+			\end{center}
+		\item 函数3
+			\begin{displaymath}
+				I=\int_{0}^{1}\frac{e^{x}}{4+x^2}\;\mathrm{d}x\qquad(I\approx{}0.3908118456)
+			\end{displaymath}
+			\begin{center}
+				\begin{tabular}{|c|c|c|c|}
+					\hline
+					算法 & $n=10$ & $n=20$ & $n=30$\\
+					\hline 
+					复化梯形公式 & 0.0000634671 & 0.0000158719 & 0.0000070546 \\
+					\hline
+					复化Simpson公式 & 0.0000000069 & 0.0000000004 & 0.0000000000 \\
+					\hline
+				\end{tabular}
+			\end{center}
+		\item 函数4
+			\begin{displaymath}
+				I=\int_{0}^{\frac{1}{4}}\sqrt{4-\sin^{2}{x}}\;\mathrm{d}x\qquad(I\approx{}0.4987111176)
+			\end{displaymath}
+			\begin{center}
+				\begin{tabular}{|c|c|c|c|}
+					\hline
+					算法 & $n=10$ & $n=20$ & $n=30$\\
+					\hline 
+					复化梯形公式 & -0.0009145438 & -0.0002284985 & -0.0001015436 \\
+					\hline
+					复化Simpson公式 & 0.0000001833 & 0.0000000114 & 0.0000000022 \\
+					\hline
+				\end{tabular}
+			\end{center}
+		\textbf{总结:}
+			\begin{enumerate}[1)]
+				\item 复化Simpson公式计算误差比复化梯形公式计算误差小。
+				\item 在使用同一种积分方法时，n越大，积分步长($h=\frac{b-a}{n}$)越短，积分计算误差越小。
+			\end{enumerate}
+	\end{enumerate}
+
+	\item 定精度要求$\varepsilon$，比较到达到精度要求的步长。
+	\begin{enumerate}[(1)]
+		\item 函数1
+			\begin{displaymath}
+				I=\int_{0}^{\frac{1}{4}}\sqrt{4-\sin^{2}{x}}\;\mathrm{d}x\qquad(I\approx{}0.4987111176)
+			\end{displaymath}
+			\begin{center}
+				\begin{tabular}{|c|c|c|c|c|}
+					\hline
+					算法 & $\varepsilon=0.001$ & $\varepsilon=0.0001$ & $\varepsilon=0.00001$ & $\varepsilon=0.000001$ \\
+					\hline 
+					复化梯形公式 & 10 & 10 & 10 & 30\\
+					\hline
+					复化Simpson公式 & 10 & 10 & 10 & 10\\
+					\hline
+				\end{tabular}
+			\end{center}
+		\item 函数2
+			\begin{displaymath}
+				I=\int_{0}^{1}\frac{\sin{x}}{x}\;\mathrm{d}x\qquad(I\approx{}0.9460830704)
+			\end{displaymath}
+			\begin{center}
+				\begin{tabular}{|c|c|c|c|c|}
+					\hline
+					算法 & $\varepsilon=0.001$ & $\varepsilon=0.0001$  & $\varepsilon=0.00001$ & $\varepsilon=0.000001$ \\
+					\hline 
+					复化梯形公式 & 10 & 20 & 50 & 160 \\
+					\hline
+					复化Simpson公式 & 10 & 10 & 10 & 10 \\
+					\hline
+				\end{tabular}
+			\end{center}
+		\item 函数3
+			\begin{displaymath}
+				I=\int_{0}^{1}\frac{e^{x}}{4+x^2}\;\mathrm{d}x\qquad(I\approx{}0.3908118456)
+			\end{displaymath}
+			\begin{center}
+				\begin{tabular}{|c|c|c|c|c|}
+					\hline
+					算法 & $\varepsilon=0.001$ & $\varepsilon=0.0001$  & $\varepsilon=0.00001$ & $\varepsilon=0.000001$ \\
+					\hline 
+					复化梯形公式 & 10 & 10 & 30 & 90\\
+					\hline
+					复化Simpson公式 & 10 & 10 & 10 & 10\\
+					\hline
+				\end{tabular}
+			\end{center}
+		\item 函数4
+			\begin{displaymath}
+				I=\int_{0}^{\frac{1}{4}}\sqrt{4-\sin^{2}{x}}\;\mathrm{d}x\qquad(I\approx{}0.4987111176)
+			\end{displaymath}
+			\begin{center}
+				\begin{tabular}{|c|c|c|c|c|}
+					\hline
+					算法 & $\varepsilon=0.001$ & $\varepsilon=0.0001$  & $\varepsilon=0.00001$ & $\varepsilon=0.000001$ \\
+					\hline 
+					复化梯形公式 & 10 & 40 & 100 & 300\\
+					\hline
+					复化Simpson公式 & 10 & 10 & 10 & 10\\
+					\hline
+				\end{tabular}
+			\end{center}
+		\textbf{总结:}
+			\begin{enumerate}[1)]
+				\item 复化Simpson公式相对于复化梯形公式收敛更快。
+				\item 精度要求越高，n越大，步长($h=\frac{b-a}{n}$)越短。
+			\end{enumerate}
+	\end{enumerate}
+\end{enumerate}
+\begin{Large}
+	\textbf{七、实验感受}
+\end{Large}
+\begin{enumerate}
+	\item 求积分数值步长越短，精度越高，计算量越大。
+	\item 复化Simpson公式相对复化梯形公式要好很多。
+	\item 写实验报告比写代码难多了。
+\end{enumerate}
+\end{document}
