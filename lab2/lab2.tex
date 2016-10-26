@@ -1,0 +1,468 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{xeCJK}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fontspec}
+\usepackage{enumerate}
+
+\setmonofont{Courier New}
+\setCJKmainfont[BoldFont={Adobe Heiti Std}, ItalicFont={Adobe Kaiti Std}]{Adobe Song Std}
+\setCJKmonofont{Courier New}
+\linespread{1.3}
+\setlength{\parindent}{2em}%首行  缩进
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\addtolength{\parskip}{2pt} % 设置段间距
+\begin{document}
+\begin{center}
+	\huge{\textbf{实验2 解线性方程组的迭代法\\}}
+\end{center}
+\begin{flushright}
+	201311211914\\
+	赵帅帅\\
+	2016--3--29\\
+\end{flushright}
+\begin{Large}
+	\textbf{一、 实验问题}
+\end{Large}
+
+	给定下列几个不同类型的线性方程组，请分别采用\textbf{Jacobi}迭代法，\textbf{Gauss-Seidel}迭代法和\textbf{SOR}迭代法求解。
+\begin{enumerate}
+	\item 线性方程组
+	\begin{displaymath} %开始数学环境
+		\left[
+		\begin{array}{cccccccccc}
+			4 & 2 & -3 & -1 & 2 & 1 & 0 & 0 & 0 & 0\\
+		    8 & 6 & -5 & -3 & 6 & 5 & 0 & 1 & 0 & 0\\
+		    4 & 2 & -2 & -1 & 3 & 2 & -1 & 0 & 3 & 1\\
+		    0 & -2 & 1 & 5 & -1 & 3 & -1 & 1 & 9 & 4\\
+		    -4 & 2 & 6 & -1 & 6 & 7 & -3 & 3 & 2 & 3\\
+		    8 & 6 & -8 & 5 & 7 & 17 & 2 & 6 & -3 & 5\\
+		    0 & 2 & -1 & 3 & -4 & 2 & 5 & 3 & 0 & 1\\
+		    16 & 10 & -11 & -9 & 17 & 34 & 2 & -1 & 2 & 2\\
+		    4 & 6 & 2 & -7 & 13 & 9 & 2 & 0 & 12 & 4\\
+		    0 & 0 & -1 & 8 & -3 & -24 & -8 & 6 & 3 & -1
+		\end{array}
+		\right]
+		\left[
+		\begin{array}{c}
+			x_1\\x_2\\x_3\\x_4\\x_5\\x_6\\x_7\\x_8\\x_9\\x_{10}
+		\end{array}
+		\right]
+		=
+		\left[
+		\begin{array}{c}
+			5\\ 12\\ 3\\ 2\\ 3\\ 46\\ 13\\ 38\\ 19\\ -21
+		\end{array}
+		\right]
+	\end{displaymath}
+	精确解$x^{*}=\left(1,-1,0,1,2,0,3,1,-1,2\right)^T$
+	\item 对称正定方程组
+	\begin{displaymath} %开始数学环境
+		\left[
+		\begin{array}{cccccccc}
+			4 & 2 & -4 & 0 & 2 & 4 & 0 & 0\\
+    		2 & 2 & -1 & -2 & 1 & 3 & 2 & 0\\
+		    -4 & -1 & 14 & 1 & -8 & -3 & 5 & 6\\
+		    0 & -2 & 1 & 6 & -1 & -4 & -3 & 3\\
+		    2 & 1 & -8 & -1 & 22 & 4 & -10 & -3\\
+		    4 & 3 & -3 & -4 & 4 & 11 & 1 & -4\\
+		    0 & 2 & 5 & -3 & -10 & 1 & 14 & 2\\
+		    0 & 0 & 6 & 3 & -3 & -4 & 2 & 19
+		\end{array}
+		\right]
+		\left[
+		\begin{array}{c}
+			x_1\\x_2\\x_3\\x_4\\x_5\\x_6\\x_7\\x_8
+		\end{array}
+		\right]
+		=
+		\left[
+		\begin{array}{c}
+			0 \\ -6 \\ 6 \\ 23 \\ 11 \\ -22 \\ -15 \\ 45
+		\end{array}
+		\right]
+	\end{displaymath}
+	精确解$x^{*}=\left(1,-1,0,2,1,-1,0,2\right)^T$
+	\item 三对角线方程组
+	\begin{displaymath} %开始数学环境
+		\left[
+		\begin{array}{cccccccccc}
+			4 & -1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+		    -1 & 4 & -1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+		    0 & -1 & 4 & -1 & 0 & 0 & 0 & 0 & 0 & 0\\
+		    0 & 0 & -1 & 4 & -1 & 0 & 0 & 0 & 0 & 0\\
+		    0 & 0 & 0 & -1 & 4 & -1 & 0 & 0 & 0 & 0\\
+		    0 & 0 & 0 & 0 & -1 & 4 & -1 & 0 & 0 & 0\\
+		    0 & 0 & 0 & 0 & 0 & -1 & 4 & -1 & 0 & 0\\
+		    0 & 0 & 0 & 0 & 0 & 0 & -1 & 4 & -1 & 0\\
+		    0 & 0 & 0 & 0 & 0 & 0 & 0 & -1 & 4 & -1\\
+		    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -1 & 4
+		\end{array}
+		\right]
+		\left[
+		\begin{array}{c}
+			x_1\\x_2\\x_3\\x_4\\x_5\\x_6\\x_7\\x_8\\x_9\\x_{10}
+		\end{array}
+		\right]
+		=
+		\left[
+		\begin{array}{c}
+			7\\ 5\\ -13\\ 2\\ 6\\ -12\\ 14\\ -4\\ 5\\ -5
+		\end{array}
+		\right]
+	\end{displaymath}
+	精确解$x^{*}=\left(2,1,-3,0,1,-2,3,0,1,-1\right)^T$
+\end{enumerate}
+\begin{Large}
+	\textbf{二、 实验要求}
+\end{Large}
+\begin{enumerate}
+	\item 应用迭代法求解线性方程组，并与直接法做比较。
+	\item 分别对不同精度要求，如$\varepsilon=10^{-3},10^{-4},10^{-5}$，利用所需迭代次数体会该迭代法收敛快慢。
+	\item 对方程做(2)，(3)使用\textbf{SOR}方法时，选取松弛因子$\omega=0.8,0.9,1,1.1,1.2$等，试观察对算法收敛的影响，并找出你所选用松弛因子的最佳值。
+	\item 编制出各种迭代法的程序并给出计算结果。
+\end{enumerate}
+\begin{Large}
+	\textbf{三、 实验目的与意义}
+\end{Large}
+\begin{enumerate}
+	\item 通过上机计算了解迭代法求解线性方程组的特点；掌握求解线性方程组的各类迭代算法。。
+	\item 体会上机计算时，终止准则$\Big\|x^{(k+1)}-x^{k}\Big\|_\infty<\varepsilon$，对控制迭代解精度的有效性。
+	\item 体会初始值$x^{(0)}$和松弛因子$\omega$的选取，对迭代收敛速度的影响。
+\end{enumerate}
+\begin{Large}
+	\textbf{四、 算法}
+\end{Large}
+\begin{enumerate}
+	\item \textbf{Jacobi迭代法\\}
+	用\textbf{Jacobi}迭代法求解方程组$\boldsymbol{Ax=b}$，一维数组$\boldsymbol{x}^{(0)}$和$\boldsymbol{x}$分别存放迭代向量$\boldsymbol{x}^{(k)}$和$\boldsymbol{x}^{(k+1)}$。
+	\begin{description}
+		\item[输入 ] 矩阵$\boldsymbol{A}=\left(a_{ij}\right)$，右端项$\boldsymbol{b}=\left(b_1,b_2,\cdots,b_n\right)^T$，维数$n$，初始向量$\boldsymbol{x}^{(0)}$，精度要求$\varepsilon$，最大迭代次数$N$
+		\item[输出 ] 迭代解$x_1,x_2,\cdots,x_n$和迭代次数$k$
+	\end{description}
+	\begin{enumerate}[(1)]
+		\item 对于$k=1,2,\cdots,N$，可循环执行步2到步5
+		\item 对于$i=1,2,\cdots,n$，计算
+			\begin{displaymath}
+				x_{i}\Leftarrow{}x_{i}^{(0)}+\frac{b_{i}-\sum\limits_{j=1}^{n}a_{ij}x_{j}^{(0)}}{a_{ii}}\footnote{算法原始表达式$x_{i}\Leftarrow{}\frac{b_{i}-\sum\limits_{j=1}^{i-1}a_{ij}x_{j}^{(k)}-\sum\limits_{j=i+1}^{n}a_{ij}x_{j}^{(k)}}{a_{ii}}$}
+			\end{displaymath}
+		\item 置$R=\max\limits_{1\leqslant{}i\leqslant{}n}\Big|x_{i}-x_{i}^{(0)}\Big|$
+		\item 如果$R\leqslant{}\varepsilon$\\输出$x_1,x_2,\cdots,x_n,k$
+		\item $x_{i}^{(0)}\Leftarrow{}x_{i},i=1,2,\cdots,n$
+		\item 已达到最大迭代次数，输出$x_1,x_2,\cdots,x_n,k$
+	\end{enumerate}
+	\item \textbf{Gauss-Seidel迭代法\\}
+	用\textbf{Gauss-Seidel}迭代法求解方程组$\boldsymbol{Ax=b}$，一维数组$\boldsymbol{x}^{(0)}$和$\boldsymbol{x}$分别存放迭代向量$\boldsymbol{x}^{(k)}$和$\boldsymbol{x}^{(k+1)}$。
+	\begin{description}
+		\item[输入 ] 矩阵$\boldsymbol{A}=\left(a_{ij}\right)$，右端项$\boldsymbol{b}=\left(b_1,b_2,\cdots,b_n\right)^T$，维数$n$，初始向量$\boldsymbol{x}^{(0)}$，精度要求$\varepsilon$，最大迭代次数$k$
+		\item[输出 ] 迭代解$x_1,x_2,\cdots,x_n$和迭代次数$k$
+	\end{description}
+	\begin{enumerate}[(1)]
+		\item 对于$k=1,2,\cdots,N$，可循环执行步2到步5
+		\item 对于$i=1,2,\cdots,n$，计算
+			\begin{displaymath}
+				x_{i}\Leftarrow{}\frac{b_{i}-\sum\limits_{j=1}^{i-1}a_{ij}x_{j}^{(k+1)}-\sum\limits_{j=i+1}^{n}a_{ij}x_{j}^{(k)}}{a_{ii}}
+			\end{displaymath}
+		\item 置$R=\max\limits_{1\leqslant{}i\leqslant{}n}\Big|x_{i}-x_{i}^{(0)}\Big|$
+		\item 如果$R\leqslant{}\varepsilon$\\输出$x_1,x_2,\cdots,x_n,k$
+		\item $x_{i}^{(0)}\Leftarrow{}x_{i},i=1,2,\cdots,n$
+		\item 已达到最大迭代次数，输出$x_1,x_2,\cdots,x_n,k$
+	\end{enumerate}
+	\item \textbf{SOR迭代法\\}
+	用\textbf{SOR}方法($\omega=1$时为\textbf{GS}迭代法)求解方程组$\boldsymbol{Ax=b}$，计算公式为
+	\begin{eqnarray}
+		x_{i}^{k+1}&=&x_{i}^{k}+\Delta{}x_{i},i=1,2,\cdots,n \nonumber \\
+		\Delta{}x_{i}&=&\frac{\omega}{a_{ii}}\left(b_{i}-\sum\limits_{j=1}^{i-1}a_{ij}x_{j}^{(k+1)}-\sum\limits_{j=i+1}^{n}a_{ij}x_{j}^{(k)}\right) \nonumber
+	\end{eqnarray}
+	用一维数组$\boldsymbol{x}$存放迭代向量$\boldsymbol{x}^{k}$，终止准则为
+	\begin{displaymath}
+		\max\limits_{1\leqslant{}i\leqslant{}n}\Big|x_{i}^{(k+1)}-x_{i}^{(k)}\Big|=\max\limits_{1\leqslant{}i\leqslant{}n}\Big|\Delta{}x_{i}\Big|\leqslant{}\varepsilon
+	\end{displaymath}
+	$\varepsilon$为设定的精度要求。为防止死循环，限制最大迭代次数为$N$。
+	\begin{description}
+		\item[输入 ] $\boldsymbol{A}=\left(a_{ij}\right),\boldsymbol{b}=\left(b_1,b_2,\cdots,b_n\right)^T,\boldsymbol{x}^{(0)}=\left(x_{1}^{(0)},x_{2}^{(0)},\cdots,x_{n}^{(0)}\right),\varepsilon,N,\omega$
+		\item[输出 ] 迭代解$x_1,x_2,\cdots,x_n$和迭代次数$k$
+	\end{description}
+	\begin{enumerate}[(1)]
+		\item $x_{i}\Leftarrow{}x_{i}^{(0)},i=1,2,\cdots,n$
+		\item 对于$k=1,2,\cdots,N$，循环执行步3到步8
+		\item $R\Leftarrow{}0$
+		\item 对于$i=1,2,\cdots,n$，循环执行步5到步7
+		\item $R_{1}\Leftarrow{}\Delta{}x_{i}=\frac{\omega}{a_{ii}}\left(b_{i}-\sum\limits_{j=1}^{n}a_{ij}x_{j}\right)$
+		\item 如果$|R_1|>|R|$，则$R\Leftarrow{}R_1$
+		\item $x_i\Leftarrow{}x_i+R_1$
+		\item 如果$|R|\leqslant{}\varepsilon$，输出：$x_1,x_2,\cdots,x_n,k$
+		\item 已达到最大迭代次数，输出：$x_1,x_2,\cdots,x_n,k$\\此时，可另选$x^{(0)}$或$\omega$重新迭代计算
+	\end{enumerate}
+\end{enumerate}
+\begin{Large}
+	\textbf{五、 实验代码}
+\end{Large}
+
+\lstset{
+	backgroundcolor=\color[rgb]{0.9,0.9,0.9}, %设置背景颜色
+    tabsize=4,    %tab大小
+    language=[GNU]C++,
+    % basicstyle=\ttfamily\small,	% 代码字体大小
+    basicstyle=\small,	% 代码字体大小
+    upquote=true,
+    aboveskip={1.5\baselineskip},
+    columns=fixed,
+    extendedchars=false,
+    breaklines=true,
+    % prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+    frame=single, % 代码加边框
+    rulesepcolor=\color{white}, % 边框颜色
+    numbers=left, % 行号的位置
+    stepnumber=1, % 两个行号之间的差值
+    numberstyle=\scriptsize\color[rgb]{0.205, 0.142, 0.73},% 行号大小 颜色
+    numbersep=5pt, % 行号与代码间的距离
+    showtabs=false, % 显示tab
+    showspaces=false, %显示空格
+    showstringspaces=false, %显示字符串中的空格
+    identifierstyle=\ttfamily, %
+    keywordstyle=\bfseries\color{blue},% 关键字颜色
+    morekeywords={}, %增加关键字
+    commentstyle=\color[rgb]{0,0.5,0}, % 注释颜色
+    stringstyle=\color[rgb]{0.627,0.126,0.941},% 字符串颜色
+    escapeinside={\%*}{*)}, % if you want to add LaTeX within your code
+    % title=\lstname % 显示用\lstinputlisting导入的文件名
+}
+
+
+\begin{enumerate}
+	\item \textbf{Jacobi迭代法}
+	\begin{spacing}{1.0}
+	\begin{lstlisting}[language=C++]
+bool Jacobi(double a[N][N], double b[N], double x[N], double e)
+{
+    double temp_x[N] = {0};
+    for(int k = 1; k <= max_iteration; k ++)
+    {
+        double R = 0;
+        for(int i = 0; i < N; i ++)
+        {
+            if(a[i][i] == 0)
+            {
+                cout<<"Divided by zero!"<<endl;
+                return false;
+            }
+            // 迭代
+            double sum = 0;
+            for(int j = 0; j < N; j ++)
+            {
+                sum += a[i][j] * temp_x[j];
+            }
+            x[i] = temp_x[i] + (b[i] - sum) / a[i][i];
+            if(fabs(x[i] - temp_x[i]) > R)
+            {
+                R = fabs(x[i] - temp_x[i]);
+            }
+            // 判断是否发散
+            if(_isnan(x[i])!=0)
+            {
+                cout<<"算法不收敛！"<<endl;
+                return false;
+            }
+        }
+        //判断是否达到精度
+        if(R <= e)
+        {
+            cout<<"迭代次数："<<k<<endl;
+            return true;
+        }
+        // 记录本次迭代结果
+        for(int i = 0; i < N; i ++)
+        {
+            temp_x[i] = x[i];
+        }
+    }
+    cout<<"迭代次数："<<max_iteration<<endl;
+    return true;
+}
+	\end{lstlisting}
+	\item \textbf{Gauss-Seidel迭代法}
+	\begin{lstlisting}
+bool Gauss_Seidel(double a[N][N], double b[N], double x[N], double e)
+{
+	double temp_x[N] = {0};
+    for(int k = 1; k <= max_iteration; k ++)
+    {
+        double R = 0;
+        for(int i = 0; i < N; i ++)
+        {
+            if(a[i][i] == 0)
+            {
+                cout<<"Divided by zero!"<<endl;
+                return false;
+            }
+			//迭代计算解
+            double sum = 0;
+            for(int j = 0; j < N; j ++)
+            {
+				//不加自己
+				if(j == i)
+				{
+					continue;
+				}
+                sum += a[i][j] * x[j];
+            }
+            x[i] = (b[i] - sum) / a[i][i];
+            if(fabs(x[i] - temp_x[i]) > R)
+            {
+                R = fabs(x[i] - temp_x[i]);
+            }
+            // 判断是否发散
+            if(_isnan(x[i])!=0)
+            {
+                cout<<"算法不收敛！"<<endl;
+                return false;
+            }
+        }
+		// 判断是否达到精度
+        if(R <= e)
+        {
+            cout<<"迭代次数："<<k<<endl;
+            return true;
+        }
+		//将上一次计算的结果放置到临时x中，为下次迭代做准备
+        for(int i = 0; i < N; i ++)
+        {
+            temp_x[i] = x[i];
+        }
+    }
+    cout<<"迭代次数："<<max_iteration<<endl;
+    return true;
+}
+	\end{lstlisting}
+	\item \textbf{SOR迭代法：}
+	\begin{lstlisting}
+bool SOR(double a[N][N], double b[N], double x[N], double e, double w)
+{
+    for(int k = 1; k <= max_iteration; k ++)
+    {
+        double R = 0;
+        for(int i = 0; i < N; i ++)
+        {
+            // 迭代
+            double sum = 0;
+            for(int j = 0; j < N; j ++)
+            {
+                sum += a[i][j] * x[j];
+            }
+            double R1 = w * (b[i] - sum) / a[i][i];
+            if(fabs(R1) > fabs(R))
+            {
+                R = R1;
+            }
+            x[i] += R1;
+            // 判断是否发散
+            if(_isnan(x[i])!=0)
+            {
+                cout<<"算法不收敛！"<<endl;
+                return false;
+            }
+        }
+        // 判断是否达到精度
+        if(fabs(R) <= e)
+        {
+            cout<<"迭代次数："<<k<<endl;
+            return true;
+        }
+    }
+    cout<<"迭代次数："<<max_iteration<<endl;
+    return true;
+}
+	\end{lstlisting}
+	\end{spacing}
+\end{enumerate}
+\begin{Large}
+	\textbf{六、实验结果}
+\end{Large}
+\begin{quote}
+	\begin{description}
+		\item[操作系统：] Windows 10 企业版
+		\item[GCC 版本：] 4.7.1
+		\item[G++ 版本：] 4.7.1
+	\end{description}
+\end{quote}
+\begin{enumerate}
+	\item 直接法与迭代法比较
+	\begin{enumerate}[(1)]
+	\item 直接法在主对角线元素不为0的情况下能保证解出方程组，但是有些算法要求方程组必须满足一些特殊条件；迭代法不一定能保证求解方程组。
+	\item 对于直接法，求解方程组的时间与矩阵的大小有关；迭代法的时间是不能确定的，即使对于同一方程组，不同的初值和精度会影响到方程组求解时间，对于SOR算法，收敛因子对于求解时间也有影响。
+	\end{enumerate}
+	\item 精度对收敛的影响\footnote{SOR算法收敛因子为1.1}
+	\begin{enumerate}[(1)]
+		\item 方程组1
+			\begin{center}
+			\begin{tabular}{|c|c|c|c|}	
+			\hline
+			算法 & $e=10^{-3}$ & $e=10^{-4}$ & $e=10^{-5}$ \\
+			\hline
+			Jacobi迭代法 & 不收敛 & 不收敛 & 不收敛\\
+			\hline
+			Gauss-Seidel迭代法 & 不收敛 & 不收敛 & 不收敛\\
+			\hline
+			SOR迭代法 & 不收敛 & 不收敛 & 不收敛\\
+			\hline
+			\end{tabular}
+		\end{center}
+		\item 方程组2
+		\begin{center}
+			\begin{tabular}{|c|c|c|c|}
+			\hline
+			算法 & $e=10^{-3}$ & $e=10^{-4}$ & $e=10^{-5}$ \\
+			\hline
+			Jacobi迭代法 & 不收敛 & 不收敛 & 不收敛\\
+			\hline
+			Gauss-Seidel迭代法 & 133 & 570 & 1006\\
+			\hline
+			SOR迭代法 & 197 & 554 & 991 \\
+		 	\hline
+			\end{tabular}
+		\end{center}
+		\item 方程组3
+			\begin{center}
+			\begin{tabular}{|c|c|c|c|}
+			\hline
+			算法 & $e=10^{-3}$ & $e=10^{-4}$ & $e=10^{-5}$ \\
+			\hline
+			Jacobi迭代法 & 11 & 14 & 18\\
+			\hline
+			Gauss-Seidel迭代法 & 7 & 9 & 11\\
+			\hline
+			SOR迭代法 & 8 & 9 & 11 \\
+			\hline
+			\end{tabular}
+		\end{center}
+	\end{enumerate}
+	由上表知，精度要求越高，算法收敛越慢。
+	\item SOR算法中收敛因子对算法收敛的影响\footnote{精度要求$10^{-5}$}
+	\begin{center}
+		\begin{tabular}{|c|c|c|c|c|c|}
+		\hline
+		方程组 & $\omega=0.8$ & $\omega=0.9$ & $\omega=1.0$ & $\omega=1.1$ & $\omega=1.2$ \\
+		\hline
+		方程组2 & 1083 & 1079 & 1006 & 911 & 809\\
+		\hline
+		方程组3 & 15 & 13 & 11 & 11 & 13\\
+		\hline
+		\end{tabular}
+	\end{center}
+	由上表知，对于方程组2，$\omega=1.2$时，算法收敛较快；对于方程组3，$\omega=1.0,1.1$时，算法收敛较快。
+\end{enumerate}
+\begin{Large}
+	\textbf{七、实验感受}
+\end{Large}
+\begin{enumerate}
+	\item 因为算法都有，所以编程没有什么难处，但是得到实验数据需要有耐心。
+	\item 写完程序之后，感觉对于比较小的矩阵还是用直接法求解比较好。
+\end{enumerate}
+\end{document}
